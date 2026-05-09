@@ -589,11 +589,7 @@
 </div>
 
 <script>
-// PASTE YOUR FIREBASE CONFIG BELOW (replace the PASTE_... values)
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -604,10 +600,6 @@ const firebaseConfig = {
   messagingSenderId: "547193134781",
   appId: "1:547193134781:web:b19724e90086d805ed61d4"
 };
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
 
 
 const CONFIG_READY = !Object.values(firebaseConfig).some(v => v.includes('PASTE_'));
