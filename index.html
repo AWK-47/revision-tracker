@@ -9,6 +9,30 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
+    --bg: #f3f4f8;
+    --surface: #ffffff;
+    --surface2: #eaecf3;
+    --border: #d8dbe8;
+    --text: #111318;
+    --text-muted: #5f6375;
+    --text-dim: #adb2c4;
+    --bio: #16a34a;
+    --bio-dim: #dcfce7;
+    --bio-glow: rgba(22,163,74,0.1);
+    --chem: #2563eb;
+    --chem-dim: #dbeafe;
+    --chem-glow: rgba(37,99,235,0.1);
+    --cs: #db2777;
+    --cs-dim: #fce7f3;
+    --cs-glow: rgba(219,39,119,0.1);
+    --accent: #7c3aed;
+    --phys: #ea580c;
+    --phys-dim: #ffedd5;
+    --phys-glow: rgba(234,88,12,0.1);
+    --radius: 10px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.1);
+  }
+  html.dark-mode {
     --bg: #0e0f14;
     --surface: #16181f;
     --surface2: #1e2028;
@@ -29,7 +53,6 @@
     --phys: #fb923c;
     --phys-dim: #3d1a05;
     --phys-glow: rgba(251,146,60,0.15);
-    --radius: 10px;
     --shadow: 0 4px 24px rgba(0,0,0,0.4);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -486,6 +509,85 @@
   .loading-wrap { display:flex; flex-direction:column; align-items:center; }
   #config-banner { position:fixed; top:0; left:0; right:0; z-index:9998; background:linear-gradient(135deg,#7c3aed,#4f46e5); color:#fff; font-size:13px; font-weight:500; padding:10px 20px; text-align:center; }
   #config-banner.hidden { display:none; }
+
+  /* SETTINGS DROPDOWN */
+  .settings-wrap { position: relative; }
+  .btn-settings {
+    width: 34px; height: 34px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 18px;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .btn-settings:hover { border-color: var(--accent); color: var(--accent); }
+  .settings-menu {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    min-width: 200px;
+    overflow: hidden;
+    z-index: 200;
+    animation: fadeUp 0.15s ease;
+  }
+  .settings-menu.hidden { display: none; }
+  .settings-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .settings-item:hover { background: var(--surface2); }
+  .settings-item.danger { color: #ef4444; }
+  .settings-item.danger:hover { background: rgba(239,68,68,0.08); }
+  .settings-divider { height: 1px; background: var(--border); margin: 3px 0; }
+  .settings-icon { font-size: 15px; width: 20px; text-align: center; }
+  /* THEME TOGGLE INSIDE SETTINGS */
+  .theme-label { flex: 1; }
+  .theme-toggle-pill {
+    width: 36px; height: 20px;
+    background: var(--border);
+    border-radius: 20px;
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .theme-toggle-pill.on { background: var(--accent); }
+  .theme-toggle-pill::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    background: #fff;
+    border-radius: 50%;
+    top: 3px; left: 3px;
+    transition: left 0.2s;
+  }
+  .theme-toggle-pill.on::after { left: 19px; }
+
+  .subject-back-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .btn-back {
+    background: none; border: none; color: var(--text-muted);
+    font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; gap: 5px; padding: 0;
+  }
+  .btn-back:hover { color: var(--text); }
 </style>
 </head>
 <body>
@@ -534,8 +636,11 @@
 <!-- SUBJECT SELECTION SCREEN -->
 <div id="subject-screen" class="hidden">
   <div class="subject-card">
-    <h2>Choose Your Subjects</h2>
-    <p>Select all the A-Level subjects you're studying. You can always update these later.</p>
+    <div class="subject-back-bar">
+      <h2 id="subject-screen-title">Choose Your Subjects</h2>
+      <button class="btn-back hidden" id="subject-back-btn" onclick="closeSubjectEdit()">✕ Cancel</button>
+    </div>
+    <p id="subject-screen-desc">Select all the A-Level subjects you're studying.</p>
     <div class="subject-options">
       <div class="subject-option" id="opt-bio" onclick="toggleSubject('bio')">
         <div class="subject-dot"></div>
@@ -582,7 +687,26 @@
     <div class="top-tabs" id="subject-tabs"></div>
     <div class="top-right">
       <div class="user-pill">👤 <span id="username-display"></span></div>
-      <button class="btn-logout" onclick="doLogout()">Log out</button>
+      <div class="settings-wrap">
+        <button class="btn-settings" id="settings-btn" onclick="toggleSettings(event)" title="Settings">⋯</button>
+        <div class="settings-menu hidden" id="settings-menu">
+          <button class="settings-item" onclick="toggleTheme()">
+            <span class="settings-icon">☀️</span>
+            <span class="theme-label" id="theme-label">Switch to Dark Mode</span>
+            <div class="theme-toggle-pill" id="theme-pill"></div>
+          </button>
+          <div class="settings-divider"></div>
+          <button class="settings-item" onclick="openSubjectEdit()">
+            <span class="settings-icon">📚</span>
+            Edit Subjects
+          </button>
+          <div class="settings-divider"></div>
+          <button class="settings-item danger" onclick="doLogout()">
+            <span class="settings-icon">🚪</span>
+            Log Out
+          </button>
+        </div>
+      </div>
     </div>
   </div>
   <div class="content" id="main-content"></div>
@@ -590,7 +714,7 @@
 
 <script>
 
-
+  
 const firebaseConfig = {
   apiKey: "AIzaSyB2Q7M7XuD0ZdkRtZSz2ZoMj5rbE1i4f2Y",
   authDomain: "revision-tracker-d4231.firebaseapp.com",
@@ -599,7 +723,6 @@ const firebaseConfig = {
   messagingSenderId: "547193134781",
   appId: "1:547193134781:web:b19724e90086d805ed61d4"
 };
-
 
 const CONFIG_READY = !Object.values(firebaseConfig).some(v => v.includes('PASTE_'));
 let db = null;
@@ -1468,6 +1591,84 @@ function expandAll(key) {
   var tab = document.getElementById('tab-' + key);
   tab.querySelectorAll('.topic-body').forEach(function(b){ b.classList.add('open'); });
   tab.querySelectorAll('.topic-toggle').forEach(function(t){ t.classList.add('open'); });
+}
+
+
+// ─────────────────────────────────────────
+// THEME
+// ─────────────────────────────────────────
+var isDark = false;
+
+function applyTheme(dark) {
+  isDark = dark;
+  if (dark) {
+    document.documentElement.classList.add('dark-mode');
+  } else {
+    document.documentElement.classList.remove('dark-mode');
+  }
+  var pill = document.getElementById('theme-pill');
+  var label = document.getElementById('theme-label');
+  if (pill) pill.classList.toggle('on', dark);
+  if (label) label.textContent = dark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+  var icon = pill && pill.previousElementSibling;
+  var settingsItem = document.querySelector('.settings-item');
+  if (settingsItem) settingsItem.querySelector('.settings-icon').textContent = dark ? '🌙' : '☀️';
+  localStorage.setItem('rt_theme', dark ? 'dark' : 'light');
+}
+
+function toggleTheme() {
+  applyTheme(!isDark);
+}
+
+// Apply saved theme on load
+(function() {
+  var saved = localStorage.getItem('rt_theme');
+  applyTheme(saved === 'dark');
+})();
+
+// ─────────────────────────────────────────
+// SETTINGS DROPDOWN
+// ─────────────────────────────────────────
+function toggleSettings(e) {
+  e.stopPropagation();
+  var menu = document.getElementById('settings-menu');
+  menu.classList.toggle('hidden');
+}
+
+document.addEventListener('click', function() {
+  var menu = document.getElementById('settings-menu');
+  if (menu) menu.classList.add('hidden');
+});
+
+// ─────────────────────────────────────────
+// SUBJECT EDIT
+// ─────────────────────────────────────────
+function openSubjectEdit() {
+  document.getElementById('settings-menu').classList.add('hidden');
+  // Pre-fill with current subjects
+  var data = getUserData();
+  selectedSubjects = (data.subjects || []).slice();
+  var colorMap = { bio: 'selected-bio', chem: 'selected-chem', cs: 'selected-cs', phys: 'selected-phys' };
+  ['bio','chem','cs','phys'].forEach(function(k) {
+    var el = document.getElementById('opt-' + k);
+    el.className = 'subject-option' + (selectedSubjects.includes(k) ? ' ' + colorMap[k] : '');
+  });
+  // Show cancel button and update text
+  document.getElementById('subject-back-btn').classList.remove('hidden');
+  document.getElementById('subject-screen-title').textContent = 'Edit Your Subjects';
+  document.getElementById('subject-screen-desc').textContent = 'Add or remove subjects. Changes will sync across all your devices.';
+  document.getElementById('subject-error').classList.add('hidden');
+  // Hide app, show subject screen
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('subject-screen').classList.remove('hidden');
+}
+
+function closeSubjectEdit() {
+  document.getElementById('subject-screen').classList.add('hidden');
+  document.getElementById('subject-back-btn').classList.add('hidden');
+  document.getElementById('subject-screen-title').textContent = 'Choose Your Subjects';
+  document.getElementById('subject-screen-desc').textContent = 'Select all the A-Level subjects you\'re studying.';
+  document.getElementById('app-screen').style.display = 'block';
 }
 
 document.addEventListener('keydown', function(e){
