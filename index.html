@@ -590,14 +590,25 @@
 
 <script>
 // PASTE YOUR FIREBASE CONFIG BELOW (replace the PASTE_... values)
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "PASTE_API_KEY_HERE",
-  authDomain: "PASTE_AUTH_DOMAIN_HERE",
-  projectId: "PASTE_PROJECT_ID_HERE",
-  storageBucket: "PASTE_STORAGE_BUCKET_HERE",
-  messagingSenderId: "PASTE_MESSAGING_SENDER_ID_HERE",
-  appId: "PASTE_APP_ID_HERE"
+  apiKey: "AIzaSyB2Q7M7XuD0ZdkRtZSz2ZoMj5rbE1i4f2Y",
+  authDomain: "revision-tracker-d4231.firebaseapp.com",
+  projectId: "revision-tracker-d4231",
+  storageBucket: "revision-tracker-d4231.firebasestorage.app",
+  messagingSenderId: "547193134781",
+  appId: "1:547193134781:web:b19724e90086d805ed61d4"
 };
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+
 
 const CONFIG_READY = !Object.values(firebaseConfig).some(v => v.includes('PASTE_'));
 let db = null;
